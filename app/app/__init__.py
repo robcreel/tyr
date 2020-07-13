@@ -1,20 +1,21 @@
+import os
+import json
+import datetime
+from bson.objectid import ObjectId
 from flask import Flask
+from flask_pymongo import PyMongo
 
-# app = Flask(__name__)
+app = Flask(__name__)
+
+if app.config["ENV"] == "production":
+    app.config.from_object("config.ProductionConfig")
+else:
+    app.config.from_object("config.DevelopmentConfig")
+
+print(f'ENV is set to: {app.config["ENV"]}')
+
+mongo = PyMongo(app)
 
 from app import views
 from app import admin_views
 
-from .extensions import mongo
-from .main import main
-
-def create_app(config_object='app.settings'):
-    app = Flask(__name__)
-
-    app.config.from_object(config_object)
-
-    mongo.init_app(app)
-
-    app.register_blueprint(main)
-    
-    return app
