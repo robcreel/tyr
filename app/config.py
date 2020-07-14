@@ -12,6 +12,8 @@ class Config(object):
     ALLOWED_IMAGE_EXTENSIONS = ["JPEG", "JPG", "PNG", "GIF", "TXT", "CSV"]
     MONGO_URI = "mongodb://127.0.0.1:27017/not_cases"
 
+    # CLIENT_DIRECTORY = "./get_served/"
+
     SESSION_COOKIE_SECURE = True
 
 class ProductionConfig(Config):

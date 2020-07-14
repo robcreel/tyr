@@ -1,7 +1,11 @@
 from app import app, mongo
-from flask import render_template, request, redirect
+from flask import render_template, request, redirect, send_from_directory, safe_join, abort
 from werkzeug.utils import secure_filename
 import os
+import pymongo
+import csv
+import zipfile
+
 
 @app.route("/")
 def index(): 
@@ -91,6 +95,62 @@ def himongo():
 
 
 
+app.config["CLIENT_DIRECTORY"] = "/home/rob/Code/tyr/tyr/get_served"
 
-# @app.route("zipper")
-# def zipper():
+@app.route("/zipper/<int:nn>") #/<int:nn>
+def zipper(nn): 
+
+    # client_directory = app.config["CLIENT_DIRECTORY"]
+
+
+    # setup PyMongo
+    myclient = pymongo.MongoClient("mongodb://localhost:27017/")
+    mydb = myclient["mydatabase"]
+    mycol = mydb["customers"]
+
+    # Get data
+    y = mycol.find().limit(nn)
+    yourlist= [each for each in y]
+
+    # Function to get first n items in a list, if there are that many.
+    def get_top_n(input_list, n):
+        n = min(n, len(input_list))
+        return(input_list[:n])
+
+    # Function to write a single dictionary to a CSV
+    def write_dict_to_CSV(input_dict, filename = "data", destination_path = "./get_served"):
+        with open(f"{destination_path}/file_{filename}.csv", "w") as f:
+            for key in input_dict.keys():
+                f.write("%s, %s\n" % (key, input_dict[key]))
+
+    # Function to write a list of dictionaries to CSVs
+    def write_dict_list_to_CSVs(input_list, destination_path = "./get_served"):
+        for i in range(len(input_list)):
+            write_dict_to_CSV(input_list[i], str(i + 1), destination_path)
+
+
+    # Function to zip a list of files.
+    def zip_list_of_files(input_list, destination_path, filename):
+        with zipfile.ZipFile(f"{destination_path}/{filename}", 'w') as zipMe:        
+            for file in input_list:
+            # filepath = f"./get_served/{file}"
+                zipMe.write(file, compress_type=zipfile.ZIP_DEFLATED)
+    
+    write_dict_list_to_CSVs(yourlist, app.config["CLIENT_DIRECTORY"])
+    temporary_list = os.listdir(app.config["CLIENT_DIRECTORY"])
+    print(temporary_list)
+    os.chdir(app.config["CLIENT_DIRECTORY"])
+    zip_list_of_files(temporary_list, app.config["CLIENT_DIRECTORY"], "out.zip")
+    for file in temporary_list:
+        os.remove(file)
+    # os.chdir("..")
+
+    # return_this_file = "serve_me.txt"
+    return_this_file = "out.zip"
+
+    try:
+        return send_from_directory(app.config["CLIENT_DIRECTORY"], filename=return_this_file, as_attachment=True)
+    except FileNotFoundError:
+        abort(404)
+
+
