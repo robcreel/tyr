@@ -8,9 +8,9 @@ class Config(object):
     DB_PASSWORD = "example"
 
     # IMAGE_UPLOADS = "/home/rob/Code/rob_attempting_to_splice_python_and_mongo/app/app/app/static/img/uploads"
-    IMAGE_UPLOADS = "./app/static/img/uploads"
-    ALLOWED_IMAGE_EXTENSIONS = ["JPEG", "JPG", "PNG", "GIF", "TXT", "CSV"]
-    MONGO_URI = "mongodb://127.0.0.1:27017/not_cases"
+    UPLOADS = "./app/static/text/uploads"
+    # ALLOWED_IMAGE_EXTENSIONS = ["JPEG", "JPG", "PNG", "GIF", "TXT", "CSV"]
+    MONGO_URI = "mongodb://127.0.0.1:27017/tyr_db"
 
     # CLIENT_DIRECTORY = "./get_served/"
 

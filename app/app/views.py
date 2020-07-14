@@ -26,14 +26,14 @@ def about():
 # app.config["ALLOWED_IMAGE_EXTENSIONS"] = ["JPEG", "JPG", "PNG", "GIF", "TXT", "CSV"]
 # app.config["MAX_IMAGE_FILESIZE"] = 0.5 * 1024 * 1024
 
-def allowed_image(filename):
+def allowed_file(filename):
 
     if not "." in filename:
         return False
 
     ext = filename.rsplit(".", 1)[1]
 
-    if ext.upper() in app.config["ALLOWED_IMAGE_EXTENSIONS"]:
+    if ext.upper() == "TXT":
         return True
     else:
         return False
@@ -47,8 +47,8 @@ def allowed_image(filename):
 #         return False
 
 
-@app.route("/upload-image", methods=["GET", "POST"])
-def upload_image():
+@app.route("/upload", methods=["GET", "POST"])
+def upload():
 
     if request.method == "POST":
 
@@ -58,41 +58,37 @@ def upload_image():
             #     print("File exceeded maximum size.")
             #     return request(request.url)
 
-            image = request.files["image"]
+            text = request.files["text"]
 
-
-            if image.filename == "":
-                print("Image must have a filename.")
+            if text.filename == "":
+                print("File must have a filename.")
                 return redirect(request.url)
 
-            if not allowed_image(image.filename):
+            if not allowed_file(text.filename):
                 print("That extension is not allowed.")
                 return redirect(request.url)
             
             else:
-                filename = secure_filename(image.filename)
-                image.save(os.path.join(app.config["IMAGE_UPLOADS"], image.filename))
+                filename = secure_filename(text.filename)
+                text.save(os.path.join(app.config["UPLOADS"], text.filename))
        
-                print("Image saved")
+                print("Document saved")
 
+                """
+                TODO Get list of hashcoded from LDA.py, then send those hashcodes to mongo for a list of text documents, which we will write into get_served, and archive.
+                """
 
             return redirect(request.url)
-
 
     return render_template("public/upload_image.html")
 
 
-#################################
-# 
-#       View for PyMongo:
-# 
-#################################
+# @app.route("/upload/query", methods = ["GET"])
+# def query():
 
-@app.route("/himongo", methods=['GET', 'POST', 'DELETE', 'PATCH'])
-def himongo():
-    teammates = mongo.db.Avengers.find_one({"Name": "Tony Stark"})
-    return f"<h1> One Marvel hero is {teammates['Made-up_Name']}.</h1>"
+#     if request.files:
 
+#         query_text = request.files[""]
 
 
 app.config["CLIENT_DIRECTORY"] = "/home/rob/Code/tyr/tyr/get_served"
@@ -112,38 +108,19 @@ def zipper(nn):
     y = mycol.find().limit(nn)
     yourlist= [each for each in y]
 
-    # Function to get first n items in a list, if there are that many.
-    def get_top_n(input_list, n):
-        n = min(n, len(input_list))
-        return(input_list[:n])
+ 
+    write_dict_list_to_CSVs(yourlist, app.config["CLIENT_DIRECTORY"])
+    temporary_list = os.listdir(app.config["CLIENT_DIRECTORY"])
+    print(temporary_list)
+    os.chdir(app.config["CLIENT_DIRECTORY"])
+    zip_list_of_files(temporary_list, app.config["CLIENT_DIRECTORY"], "out.zip")
 
-    # Function to write a single dictionary to a CSV
-    def write_dict_to_CSV(input_dict, filename = "data", destination_path = "./get_served"):
-        with open(f"{destination_path}/file_{filename}.csv", "w") as f:
-            for key in input_dict.keys():
-                f.write("%s, %s\n" % (key, input_dict[key]))
-
-    # Function to write a list of dictionaries to CSVs
-    def write_dict_list_to_CSVs(input_list, destination_path = "./get_served"):
-        for i in range(len(input_list)):
-            write_dict_to_CSV(input_list[i], str(i + 1), destination_path)
-
-
-    # Function to zip a list of files.
-    def zip_list_of_files(input_list, destination_path, filename):
-        with zipfile.ZipFile(f"{destination_path}/{filename}", 'w') as zipMe:        
-            for file in input_list:
-            # filepath = f"./get_served/{file}"
-                zipMe.write(file, compress_type=zipfile.ZIP_DEFLATED)
     
     write_dict_list_to_CSVs(yourlist, app.config["CLIENT_DIRECTORY"])
     temporary_list = os.listdir(app.config["CLIENT_DIRECTORY"])
     print(temporary_list)
     os.chdir(app.config["CLIENT_DIRECTORY"])
     zip_list_of_files(temporary_list, app.config["CLIENT_DIRECTORY"], "out.zip")
-    for file in temporary_list:
-        os.remove(file)
-    # os.chdir("..")
 
     # return_this_file = "serve_me.txt"
     return_this_file = "out.zip"
