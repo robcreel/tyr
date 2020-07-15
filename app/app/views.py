@@ -12,19 +12,9 @@ def index():
     return render_template("public/index.html")
 
 
-@app.route("/jinja")
-def jinja():
-    return render_template("public/jinja.html")
-
 @app.route("/about")
 def about():
     return "<h1 style='color: red'>About!!!</h1>"
-
-
-# Note see Julian Nash tutorial Part 12 for more on app.config
-# app.config["IMAGE_UPLOADS"] = "/home/rob/Code/tyr/tyr/app/app/static/img/uploads"
-# app.config["ALLOWED_IMAGE_EXTENSIONS"] = ["JPEG", "JPG", "PNG", "GIF", "TXT", "CSV"]
-# app.config["MAX_IMAGE_FILESIZE"] = 0.5 * 1024 * 1024
 
 def allowed_file(filename):
 
@@ -80,7 +70,7 @@ def upload():
 
             return redirect(request.url)
 
-    return render_template("public/upload_image.html")
+    return render_template("public/upload.html")
 
 
 # @app.route("/upload/query", methods = ["GET"])
