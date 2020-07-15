@@ -59,10 +59,11 @@ lm = WordNetLemmatizer()
 
 #defining functions
 
-def mongoAddCase(case):
+def mongoAddCase(case, text):
     d = {
         'name': case['name'],
-        'date': case['decision_date']
+        'date': case['decision_date'],
+        'text': text
     }
     return str(case_col.insert_one(d).inserted_id)
 
@@ -98,18 +99,16 @@ with open('./data/cases.jsonl') as file:
         if( index >= arg ): break
         else:
             cases.append(json.loads(line))
-
+print('Parsing XML')
+caseStrings = pool.map(xmlToStrings, cases)
 print('Populating database')
 mongoose = []
 
-for case in cases:
-    mongoose.append(mongoAddCase(case))
+for i, case in enumerate(cases):
+    mongoose.append(mongoAddCase(case,caseStrings[i]))
 
 with open('./data/idhash.txt', 'w') as out:
     out.write('\n'.join(mongoose))
-
-print('Parsing XML')
-caseStrings = pool.map(xmlToStrings, cases)
 print('Scrubbing punctuation')
 scrubbedStrings = pool.map(scrubPunct, caseStrings)
 print('Tokenizing')
