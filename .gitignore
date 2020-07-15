@@ -1,2 +1,5 @@
-./data
+./data/data.csv
+./data/cases.jsonl
+./data/idhash.txt
 ./app/env/
+./bfg-1.13.0.jar

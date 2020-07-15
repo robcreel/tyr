@@ -33,6 +33,11 @@ import re
 import multiprocessing as mp
 import sys
 import math
+from pymongo import MongoClient
+client = MongoClient('mongodb://localhost:27017')
+db = client['tyrdb']
+case_col = db['cases']
+
 
 #nlp module import and model initialization
 import nltk
@@ -51,7 +56,17 @@ from nltk.stem import WordNetLemmatizer
 lm = WordNetLemmatizer()
 
 
+
 #defining functions
+
+def mongoAddCase(case, text):
+    d = {
+        'name': case['name'],
+        'date': case['decision_date'],
+        'text': text
+    }
+    return str(case_col.insert_one(d).inserted_id)
+
 def xmlToStrings(xml):
     return et.tostring(et.fromstring(xml['casebody']['data']), encoding='utf-8', method='text').decode()
 
@@ -84,12 +99,16 @@ with open('./data/cases.jsonl') as file:
         if( index >= arg ): break
         else:
             cases.append(json.loads(line))
-
-
 print('Parsing XML')
 caseStrings = pool.map(xmlToStrings, cases)
-print('Clearing RAM')
-del cases[:]
+print('Populating database')
+mongoose = []
+
+for i, case in enumerate(cases):
+    mongoose.append(mongoAddCase(case,caseStrings[i]))
+
+with open('./data/idhash.txt', 'w') as out:
+    out.write('\n'.join(mongoose))
 print('Scrubbing punctuation')
 scrubbedStrings = pool.map(scrubPunct, caseStrings)
 print('Tokenizing')
@@ -98,7 +117,7 @@ print('Lemmatizing')
 lemmatized = pool.map(lemmatize, tokenized)
 print('Removing Stopwords')
 unStopped = pool.map(removeStops, lemmatized)
-print('Outputting to Csv')
+print('Outputting to CSV')
 lines = pool.map(listToLine, unStopped)
 
 with open('./data/data.csv', 'w') as out:
