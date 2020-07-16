@@ -20,6 +20,7 @@ doc_num = 1000
 num_topics = 50
 iterations = 400
 passes = 20
+workers = os.cpu_count()-1
 eval_every = None
 
 def create_dict(path, docNum):
@@ -73,16 +74,15 @@ def query_hellinger(doc, lda_corpus, model, threshold = 0.3,limit = 100):
 
 if(__name__ == '__main__'):
     if(len(sys.argv) > 1):
-        data_path = sys.argv[1]
+        doc_num = int(sys.argv[1])
     if(len(sys.argv) > 2):
-        doc_num = int(sys.argv[2])
-    if(len(sys.argv) > 3):
-        num_topics = int(sys.argv[3])
+        num_topics = int(sys.argv[2])
     #encoding features as bijection with some numerical set using dictionary
-    myDict = create_dict(data_path, doc_num)
+    csv_path = os.path.join(data_path, 'data.csv')
+    myDict = create_dict(csv_path, doc_num)
     #creating two identical corpora. Necessary since corpora is implemented as generator coroutine
-    myCorpus = CaseCorpus(data_path, myDict)
+    myCorpus = CaseCorpus(csv_path, myDict)
 
-    model = models.LdaModel(myCorpus, id2word = myDict, num_topics = num_topics,
-                            chunksize=chunksize, iterations = iterations, eval_every=eval_every)
+    model = models.LdaMulticore(myCorpus, id2word = myDict, num_topics = num_topics,
+                            chunksize=chunksize, iterations = iterations, eval_every=eval_every, workers=workers)
     model.save(model_file)
