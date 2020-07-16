@@ -1,6 +1,6 @@
 {% extends "public/templates/public_template.html" %}
 
-{% block title %}Upload{% endblock %}
+{% block title %}Search{% endblock %}
 
 {% block main %}
 
@@ -8,10 +8,10 @@
   <div class="row">
     <div class="col">
 
-      <h1>Upload a document.</h1>
+      <h1>Upload a document to find similar ones.</h1>
       <hr>
 
-      <form action="/upload" method="POST" enctype="multipart/form-data">
+      <form action="/search" method="POST" enctype="multipart/form-data">
 
         <div class="form-group">
           <label>Select text file.</label>
