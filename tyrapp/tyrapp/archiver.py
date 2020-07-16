@@ -19,10 +19,11 @@ def write_list_to_TXTs(input_list, destination_path = get_served):
         write_to_TXT(d["text"], filename, destination_path)
 
 # Function to zip a list of files.
-def zip_list_of_files(input_list, destination_path, filename):
+def zip_list_of_files(filename_list, destination_path, filename):
+    filepath_list = [os.path.join(get_served, filename) for filename in filename_list]
     with zipfile.ZipFile(f"{destination_path}/{filename}", 'w') as zipMe:        
-        for file in input_list:
-            zipMe.write(file, compress_type=zipfile.ZIP_DEFLATED)
+        for i, filename in enumerate(filename_list):
+            zipMe.write(filepath_list[i], filename, compress_type=zipfile.ZIP_DEFLATED)
 
 # Function to empty get_served directory
 def cleanup():
