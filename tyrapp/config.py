@@ -9,11 +9,12 @@ class Config(object):
     DB_PASSWORD = "example"
 
     # IMAGE_UPLOADS = "/home/rob/Code/rob_attempting_to_splice_python_and_mongo/app/app/app/static/img/uploads"
-    UPLOADS = "./tyrapp/static/text/uploads"
+
     # ALLOWED_IMAGE_EXTENSIONS = ["JPEG", "JPG", "PNG", "GIF", "TXT", "CSV"]
     MONGO_URI = "mongodb://127.0.0.1:27017/tyr_db"
     CONFIG_PATH = os.path.dirname(os.path.abspath(__file__))
     APP_ROOT = os.path.join(CONFIG_PATH, 'tyrapp')
+    UPLOADS = os.path.join(APP_ROOT, "static", "txt", "uploads")
     DATA_PATH = os.path.join(APP_ROOT, 'data')
     CLIENT_DIRECTORY = os.path.join(APP_ROOT, 'get_served')
 

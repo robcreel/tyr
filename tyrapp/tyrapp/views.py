@@ -12,21 +12,25 @@ import zipfile
 from gensim import models
 from multiprocessing import Pool
 
-#rather than deconstructing and reconstructing object ids through strings, 
-#we are simply pickling and unpickling those object ids
-#from bson.objectid import ObjectId
+# rather than deconstructing and reconstructing object ids through strings, 
+# we are simply pickling and unpickling those object ids
+# from bson.objectid import ObjectId
 
 app_root = app.config['APP_ROOT']
+
 get_served = os.path.join(app_root, 'get_served')
 
 Archiver.cleanup()
 
 pool = Pool(os.cpu_count() - 1)
-doc_num = 100
+doc_num = 1000
 data_path = app.config["DATA_PATH"]
 csv_path = os.path.join(data_path, 'data.csv')
+print("Populating dictionary")
 corpus_dictionary = LDA.create_dict(csv_path, doc_num)
+print("Loading model to server")
 model = models.LdaModel.load(LDA.model_file)
+print("Connecting to database")
 client = pymongo.MongoClient("mongodb://localhost:27017/")
 tyr_db = client["tyr_db"]
 cases_collection = tyr_db["cases"]
@@ -34,6 +38,7 @@ cases_collection = tyr_db["cases"]
 
 @app.route("/")
 def index():
+    print("Here I am!")
     return render_template("public/index.html")
 
 
@@ -82,13 +87,11 @@ def upload():
             if not allowed_file(text.filename):
                 print("That extension is not allowed.")
                 return redirect(request.url)
-            
             else:
                 Archiver.cleanup()
                 filename = secure_filename(text.filename)
                 filepath = os.path.join(app.config["UPLOADS"], filename)
                 text.save(filepath)
-       
                 print("Document saved")
                 with open(filepath) as doc:
                     doc_text = doc.read()
@@ -101,6 +104,7 @@ def upload():
                 print(f"Removing Stopwords from {filename}")
                 stopless = Munge.removeStops(lemmatized)
                 print("Generating Corpus List")
+                
                 lda_corpus = LDA.CaseCorpus(csv_path, corpus_dictionary)
                 lda_corpus_list = [lda for lda in lda_corpus]
                 print("Running Hellinger Query")
@@ -115,7 +119,6 @@ def upload():
                 print("Sending zipfile")
                 return send_from_directory(get_served,filename='out.zip', as_attachment=True)
 
-                
             return redirect(request.url)
 
     return render_template("public/upload.html")
@@ -129,29 +132,25 @@ def upload():
 #         query_text = request.files[""]
 
 
-app.config["CLIENT_DIRECTORY"] = "/home/rob/Code/tyr/tyr/get_served"
-
+"""
 @app.route("/zipper/<int:nn>") #/<int:nn>
-def zipper(nn): 
+def zipper(nn):
 
     # client_directory = app.config["CLIENT_DIRECTORY"]
 
 
     # setup PyMongo
-    
 
     # Get data
     y = mycol.find().limit(nn)
     yourlist= [each for each in y]
 
- 
     write_dict_list_to_CSVs(yourlist, app.config["CLIENT_DIRECTORY"])
     temporary_list = os.listdir(app.config["CLIENT_DIRECTORY"])
     print(temporary_list)
     os.chdir(app.config["CLIENT_DIRECTORY"])
     zip_list_of_files(temporary_list, app.config["CLIENT_DIRECTORY"], "out.zip")
 
-    
     write_dict_list_to_CSVs(yourlist, app.config["CLIENT_DIRECTORY"])
     temporary_list = os.listdir(app.config["CLIENT_DIRECTORY"])
     print(temporary_list)
@@ -165,5 +164,5 @@ def zipper(nn):
         return send_from_directory(app.config["CLIENT_DIRECTORY"], filename=return_this_file, as_attachment=True)
     except FileNotFoundError:
         abort(404)
-
+ """
 
