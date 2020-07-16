@@ -10,6 +10,7 @@ import re
 import multiprocessing as mp
 import sys
 import math
+import pickle
 
 #nlp module import and model initialization
 import nltk
@@ -33,7 +34,7 @@ def xmlToStrings(xml):
     return et.tostring(et.fromstring(xml['casebody']['data']), encoding='utf-8', method='text').decode()
 
 def scrubPunct(txt):
-    doc = re.sub(r'[-\(\)]', ' ', txt)
+    doc = re.sub(r'[-\(\)]\n', ' ', txt)
     return re.sub(r'[^a-zA-Z0-9 ]', '', doc)
 
 def tokenize(doc):
@@ -73,7 +74,7 @@ if(__name__ == "__main__"):
             os.chdir('../')
     from pymongo import MongoClient
     client = MongoClient('mongodb://localhost:27017')
-    db = client['tyrdb']
+    db = client['tyr_db']
     case_col = db['cases']
 
     def mongoAddCase(case, text):
@@ -82,7 +83,7 @@ if(__name__ == "__main__"):
             'date': case['decision_date'],
             'text': text
         }
-        return str(case_col.insert_one(d).inserted_id)
+        return case_col.insert_one(d).inserted_id
 
     #process pool leaves you a cpu core for other things while you're waiting
     pool = mp.Pool(os.cpu_count() - 1)
@@ -103,9 +104,8 @@ if(__name__ == "__main__"):
 
     for i, case in enumerate(cases):
         mongo_ids.append(mongoAddCase(case,caseStrings[i]))
-
-    with open('./data/idhash.txt', 'w') as out:
-        out.write('\n'.join(mongo_ids))
+    with open('./data/obj_ids.p', 'wb') as pickle_file:
+        pickle.dump(mongo_ids, pickle_file)
     print('Scrubbing punctuation')
     scrubbedStrings = pool.map(scrubPunct, caseStrings)
     print('Tokenizing')

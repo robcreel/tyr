@@ -1,12 +1,20 @@
 from gensim import corpora, models
 from gensim.matutils import hellinger
+from gensim.test.utils import datapath
 from collections import defaultdict
 import sys
 import os
 import logging
 from multiprocessing import Pool
-pool = Pool(os.cpu_count() - 1)
+import pickle
 
+
+
+model_file = datapath("model")
+pool = Pool(os.cpu_count() - 1)
+data_path = './data/data.csv'
+doc_num = 1000
+num_topics = 50
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
 def create_dict(path, docNum):
@@ -34,23 +42,28 @@ class CaseCorpus(object):
             for line in file:
                 yield self.dict.doc2bow(line.split(','))
 
-with open('./data/idhash.txt', 'r') as hash_file:
-    hash_list = hash_file.read().split('\n')
 
-def queryHellinger(doc, corpus, model, threshold = 0.3,limit = 100):
+mypath = './data/obj_ids.p'
+with open(mypath, 'rb') as pickle_file:
+    mongo_ids = pickle.load(pickle_file)
+
+def query_hellinger(doc, corpus, model, threshold = 0.3,limit = 100):
     doc_bow = model.id2word.doc2bow(doc)
     doc_lda = model[doc_bow]
     lda_tuples = [(doc_lda, model_lda) for model_lda in model[corpus]]
     corpus_hellinger = pool.starmap(hellinger, lda_tuples)
-    zipped_corpus = list(zip(hash_list, corpus_hellinger))
+    zipped_corpus = list(zip(mongo_ids, corpus_hellinger))
     filtered_corpus = list(filter(lambda x: x[1] < threshold, zipped_corpus))
     filtered_corpus.sort(key = lambda x: x[1])
     return [x[0] for x in filtered_corpus]
 
 if(__name__ == '__main__'):
-    data_path = sys.argv[1] if len(sys.argv) > 1 else './data/data.csv'
-    doc_num = int(sys.argv[2]) if len(sys.argv) > 2 else 1000
-    arg3 = int(sys.argv[3]) if len(sys.argv) > 3 else 50
+    if(len(sys.argv) > 1):
+        data_path = sys.argv[1]
+    if(len(sys.argv) > 2):
+        doc_num = int(sys.argv[2])
+    if(len(sys.argv) > 3):
+        num_topics = int(sys.argv[3])
     #encoding features as bijection with some numerical set using dictionary
     myDict = create_dict(data_path, doc_num)
     #creating two identical corpora. Necessary since corpora is implemented as generator coroutine
@@ -61,8 +74,9 @@ if(__name__ == '__main__'):
     #tfidf = models.TfidfModel(myCorpus)
     #your_tfidf = tfidf[yourCorpus]
 
-    model = models.LdaModel(myCorpus, id2word = myDict, num_topics = arg3)
-    #model.show_topics(num_topics=arg3, num_words = 10, log=False, formatted=True)
+    model = models.LdaModel(myCorpus, id2word = myDict, num_topics = num_topics)
+    #model.show_topics(num_topics=num_topics, num_words = 10, log=False, formatted=True)
     dum_doc = ['finance', 'money', 'sell']
     #stupid_doc = ['divorce', 'alimony', 'support']
-    print(queryHellinger(dum_doc, yourCorpus, model, threshold = 0.7))
+    print(query_hellinger(dum_doc, yourCorpus, model, threshold = 0.7))
+    model.save(model_file)

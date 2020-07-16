@@ -4,11 +4,35 @@ from werkzeug.utils import secure_filename
 import os
 import pymongo
 import csv
+import sys
 import zipfile
+from gensim import models
+from multiprocessing import Pool
 
+#rather than deconstructing and reconstructing object ids through strings, 
+#we are simply pickling and unpickling those object ids
+#from bson.objectid import ObjectId
+
+sys.path.append('./archiver')
+sys.path.append('../LDA')
+sys.path.append('../munge')
+import LDA
+import munge as Munge
+import archiver as Archiver
+
+Archiver.cleanup()
+
+pool = Pool(os.cpu_count() - 1)
+doc_num = 100
+
+corpus_dictionary = LDA.create_dict(LDA.data_path, doc_num)
+model = models.LdaModel.load(LDA.model_file)
+client = pymongo.MongoClient("mongodb://localhost:27017/")
+tyr_db = client["tyr_db"]
+cases_collection = tyr_db["cases"]
 
 @app.route("/")
-def index(): 
+def index():
     return render_template("public/index.html")
 
 
@@ -60,14 +84,37 @@ def upload():
             
             else:
                 filename = secure_filename(text.filename)
-                text.save(os.path.join(app.config["UPLOADS"], text.filename))
+                filepath = os.path.join(app.config["UPLOADS"], filename)
+                text.save(filepath)
        
                 print("Document saved")
+                with open(filepath) as doc:
+                    doc_text = doc.read()
+                print(f"Scrubbing Punctuation from {filename}")
+                scrubbed_text = Munge.scrubPunct(doc_text)
+                print(f"Tokenizing {filename}")
+                tokens = Munge.tokenize(scrubbed_text)
+                print(f"Lemmatizing {filename}")
+                lemmatized = Munge.lemmatize(tokens)
+                print(f"Removing Stopwords from {filename}")
+                stopless = Munge.removeStops(lemmatized)
+                
+                lda_corpus = LDA.CaseCorpus(LDA.data_path, corpus_dictionary)
+                lda_corpus_list = [lda for lda in lda_corpus]
+          
+                object_ids = LDA.query_hellinger(stopless, lda_corpus, model, threshold = 0.9)
+                docs_iter = cases_collection.find({'_id': {'$in': object_ids}})
+                docs_list = [doc for doc in docs_iter]
+                
+                Archiver.write_list_to_TXTs(docs_list)
+                filename_list = os.listdir('./get_served')
+            
+                Archiver.zip_list_of_files(filename_list, './get_served', 'out.zip')
+                sent = send_from_directory('./get_served',filename='out.zip', as_attachment=True)
+                Archiver.cleanup()
+                return sent
 
-                """
-                TODO Get list of hashcoded from LDA.py, then send those hashcodes to mongo for a list of text documents, which we will write into get_served, and archive.
-                """
-
+                
             return redirect(request.url)
 
     return render_template("public/upload.html")
@@ -90,9 +137,7 @@ def zipper(nn):
 
 
     # setup PyMongo
-    myclient = pymongo.MongoClient("mongodb://localhost:27017/")
-    mydb = myclient["mydatabase"]
-    mycol = mydb["customers"]
+    
 
     # Get data
     y = mycol.find().limit(nn)
