@@ -1,4 +1,3 @@
-from tyrapp import app
 import os
 import shutil
 import wget
