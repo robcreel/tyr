@@ -56,11 +56,11 @@ else:
 with open(os.path.join(data_path, 'obj_ids.p'), 'rb') as pickle_file:
     mongo_ids = pickle.load(pickle_file)
 
-def query_hellinger(doc, corpus, model, threshold = 0.3,limit = 100):
+def query_hellinger(doc, lda_corpus, model, threshold = 0.3,limit = 100):
     doc_bow = model.id2word.doc2bow(doc)
     doc_lda = model[doc_bow]
     print("Transforming corpus")
-    lda_tuples = [(doc_lda, model_lda) for model_lda in model[corpus]]
+    lda_tuples = [(doc_lda, other_lda) for other_lda in lda_corpus]
     print("Calculating topical relevence between upload and corpus docs")
     corpus_hellinger = pool.starmap(hellinger, lda_tuples)
     zipped_corpus = list(zip(mongo_ids, corpus_hellinger))

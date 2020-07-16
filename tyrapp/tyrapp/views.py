@@ -30,6 +30,9 @@ print("Populating dictionary")
 corpus_dictionary = LDA.create_dict(csv_path, doc_num)
 print("Loading model to server")
 model = models.LdaModel.load(LDA.model_file)
+bow_corpus = LDA.CaseCorpus(csv_path, corpus_dictionary)
+lda_corpus = model[bow_corpus]
+
 print("Connecting to database")
 client = pymongo.MongoClient("mongodb://localhost:27017/")
 tyr_db = client["tyr_db"]
@@ -103,10 +106,6 @@ def upload():
                 lemmatized = Munge.lemmatize(tokens)
                 print(f"Removing Stopwords from {filename}")
                 stopless = Munge.removeStops(lemmatized)
-                print("Generating Corpus List")
-                
-                lda_corpus = LDA.CaseCorpus(csv_path, corpus_dictionary)
-                lda_corpus_list = [lda for lda in lda_corpus]
                 print("Running Hellinger Query")
                 object_ids = LDA.query_hellinger(stopless, lda_corpus, model, threshold = 0.5)
                 docs_iter = cases_collection.find({'_id': {'$in': object_ids}})
