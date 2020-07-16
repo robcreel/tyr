@@ -1,0 +1,50 @@
+{% extends "public/templates/public_template.html" %}
+
+{% block title %} Index {% endblock%}
+
+{% block main %}
+
+<section class="team">
+
+  <div class="container">
+    <div class="row">
+        <div class="col">
+            <h1>The Team</h1>
+        </div>
+    </div>
+    <div class="row">
+            <div class="col-6 profile">
+              <div class="img-box">
+                <img style="max-width:70%;height:auto" src="{{ url_for('static', filename='img/max.jpg')}}" class="img-responsive">
+              </div>
+              <h1>Max Wibert</h1>
+              <p>Max Wibert is a data scientist and a tutor in math and computer science for Varsity Tutors. 
+              With a rigorous training in higher theoretical mathematics from University of Pennsylvania and experience in multiple tech stacks including
+              the python, node, and C++ ecosystems, he has a wide array of tools for critical problem solving and analysis. He has built projects on subjects including stable-isotope analysis,
+              orbital mechanics, neuroscience, using tools such as machine learning, statistics, and homological algebra. He is an outgoing team player with enough get-up-and-go to hatch ideas 
+              for interesting, dynamic projects, and enough get-up-and-go to bring them to fruition.
+              </p>
+            </div>
+            <div class="col-6 profile">
+              <div class="img-box">
+                <img style="max-width:50%;height:auto" src="{{url_for('static', filename='img/rob.png')}}" class="img-responsive">
+              </div>
+              <h1>Rob Creel</h1>
+              <p>Rob Creel is a data analyst and math professor with strong proficiency in R, Python, and SQL. 
+              He has a strong personal drive and capacity to glean value-adding insights from tidy and untidy data. 
+              He employs  his mathematics background and coding abilities to communicate compelling analyses. 
+              Rob has continued his academic achievement through data science work with Johns Hopkins and Northwestern University.  
+              An active contributor to various Chicago tech communities, Rob can often be found meeting with Chipy, CRUG, DevTogether, and FreeGeek. 
+              He recently completed a personal work project to organize classroom attendance data into useful summary information.
+              With a bent toward lifelong learning and teaching, he demonstrates pedagogically sound habits 
+              in collaborating with and leading teams of varied backgrounds and skillsets.</p>
+            </div>
+        </div>
+    </div>
+  </div>
+</section>
+
+
+
+
+{% endblock %}

@@ -42,12 +42,12 @@ cases_collection = tyr_db["cases"]
 @app.route("/")
 def index():
     print("Here I am!")
-    return render_template("public/index.html")
+    return render_template("public/index.html", active_id="home")
 
 
 @app.route("/about")
 def about():
-    return "<h1 style='color: red'>About!!!</h1>"
+    return render_template("public/about.html", active_id = "about")
 
 def allowed_file(filename):
 
@@ -70,8 +70,8 @@ def allowed_file(filename):
 #         return False
 
 
-@app.route("/upload", methods=["GET", "POST"])
-def upload():
+@app.route("/search", methods=["GET", "POST"])
+def search():
 
     if request.method == "POST":
 
@@ -120,48 +120,4 @@ def upload():
 
             return redirect(request.url)
 
-    return render_template("public/upload.html")
-
-
-# @app.route("/upload/query", methods = ["GET"])
-# def query():
-
-#     if request.files:
-
-#         query_text = request.files[""]
-
-
-"""
-@app.route("/zipper/<int:nn>") #/<int:nn>
-def zipper(nn):
-
-    # client_directory = app.config["CLIENT_DIRECTORY"]
-
-
-    # setup PyMongo
-
-    # Get data
-    y = mycol.find().limit(nn)
-    yourlist= [each for each in y]
-
-    write_dict_list_to_CSVs(yourlist, app.config["CLIENT_DIRECTORY"])
-    temporary_list = os.listdir(app.config["CLIENT_DIRECTORY"])
-    print(temporary_list)
-    os.chdir(app.config["CLIENT_DIRECTORY"])
-    zip_list_of_files(temporary_list, app.config["CLIENT_DIRECTORY"], "out.zip")
-
-    write_dict_list_to_CSVs(yourlist, app.config["CLIENT_DIRECTORY"])
-    temporary_list = os.listdir(app.config["CLIENT_DIRECTORY"])
-    print(temporary_list)
-    os.chdir(app.config["CLIENT_DIRECTORY"])
-    zip_list_of_files(temporary_list, app.config["CLIENT_DIRECTORY"], "out.zip")
-
-    # return_this_file = "serve_me.txt"
-    return_this_file = "out.zip"
-
-    try:
-        return send_from_directory(app.config["CLIENT_DIRECTORY"], filename=return_this_file, as_attachment=True)
-    except FileNotFoundError:
-        abort(404)
- """
-
+    return render_template("public/search.html", active_id="search")
