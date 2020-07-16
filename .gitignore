@@ -1,5 +1,7 @@
-./data/data.csv
-./data/cases.jsonl
-./data/idhash.txt
+.tyrapp/tyrappp/data/data.csv
+.tyrapp/tyrapp/data/cases.jsonl
+.tyrapp/tyrapp/data/idhash.txt
+.tyrapp/tyrapp/data/obj_ids.p
 ./app/env/
 ./bfg-1.13.0.jar
+

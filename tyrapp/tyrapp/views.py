@@ -100,20 +100,19 @@ def upload():
                 lemmatized = Munge.lemmatize(tokens)
                 print(f"Removing Stopwords from {filename}")
                 stopless = Munge.removeStops(lemmatized)
-                
+                print("Generating Corpus List")
                 lda_corpus = LDA.CaseCorpus(csv_path, corpus_dictionary)
                 lda_corpus_list = [lda for lda in lda_corpus]
-          
-                object_ids = LDA.query_hellinger(stopless, lda_corpus, model, threshold = 0.9)
+                print("Running Hellinger Query")
+                object_ids = LDA.query_hellinger(stopless, lda_corpus, model, threshold = 0.5)
                 docs_iter = cases_collection.find({'_id': {'$in': object_ids}})
                 docs_list = [doc for doc in docs_iter]
-                
+                print("Writing corpus to directory")
                 Archiver.write_list_to_TXTs(docs_list)
                 filename_list = os.listdir(get_served)
-                filepath_list = [os.path.join(get_served, filename) for filename in filename_list]
-            
-                Archiver.zip_list_of_files(filepath_list, get_served, 'out.zip')
-                
+                print("Zipping corpus directory")
+                Archiver.zip_list_of_files(filename_list, get_served, 'out.zip')
+                print("Sending zipfile")
                 return send_from_directory(get_served,filename='out.zip', as_attachment=True)
 
                 

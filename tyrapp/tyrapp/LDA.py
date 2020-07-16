@@ -12,9 +12,15 @@ import pickle
 
 model_file = datapath("model")
 pool = Pool(os.cpu_count() - 1)
+logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
+
+#training parameters
+chunksize =2000
 doc_num = 1000
 num_topics = 50
-logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
+iterations = 400
+passes = 20
+eval_every = None
 
 def create_dict(path, docNum):
     dictionaryDocs = []
@@ -53,11 +59,16 @@ with open(os.path.join(data_path, 'obj_ids.p'), 'rb') as pickle_file:
 def query_hellinger(doc, corpus, model, threshold = 0.3,limit = 100):
     doc_bow = model.id2word.doc2bow(doc)
     doc_lda = model[doc_bow]
+    print("Transforming corpus")
     lda_tuples = [(doc_lda, model_lda) for model_lda in model[corpus]]
+    print("Calculating topical relevence between upload and corpus docs")
     corpus_hellinger = pool.starmap(hellinger, lda_tuples)
     zipped_corpus = list(zip(mongo_ids, corpus_hellinger))
+    print("Filtering by topical relevance")
     filtered_corpus = list(filter(lambda x: x[1] < threshold, zipped_corpus))
+    print('Sorting by topical relevence')
     filtered_corpus.sort(key = lambda x: x[1])
+    print(f"Limiting corpus to {limit} most related documents")
     return [x[0] for x in filtered_corpus]
 
 if(__name__ == '__main__'):
@@ -72,5 +83,6 @@ if(__name__ == '__main__'):
     #creating two identical corpora. Necessary since corpora is implemented as generator coroutine
     myCorpus = CaseCorpus(data_path, myDict)
 
-    model = models.LdaModel(myCorpus, id2word = myDict, num_topics = num_topics)
+    model = models.LdaModel(myCorpus, id2word = myDict, num_topics = num_topics,
+                            chunksize=chunksize, iterations = iterations, eval_every=eval_every)
     model.save(model_file)
