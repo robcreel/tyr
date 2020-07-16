@@ -1,4 +1,3 @@
-from tyrapp import app
 from gensim import corpora, models
 from gensim.matutils import hellinger
 from gensim.test.utils import datapath
@@ -42,8 +41,12 @@ class CaseCorpus(object):
             for line in file:
                 yield self.dict.doc2bow(line.split(','))
 
-
-data_path = app.config['DATA_PATH']
+print('__name__ from LDA', __name__)
+if(__name__ == 'tyrapp.LDA'):
+    from tyrapp import app
+    data_path = app.config['DATA_PATH']
+else:
+    data_path ='./data'
 with open(os.path.join(data_path, 'obj_ids.p'), 'rb') as pickle_file:
     mongo_ids = pickle.load(pickle_file)
 
@@ -68,15 +71,6 @@ if(__name__ == '__main__'):
     myDict = create_dict(data_path, doc_num)
     #creating two identical corpora. Necessary since corpora is implemented as generator coroutine
     myCorpus = CaseCorpus(data_path, myDict)
-    yourCorpus = CaseCorpus(data_path, myDict)
-
-    #transforming corpus using term-frequency inverse-document-frequency
-    #tfidf = models.TfidfModel(myCorpus)
-    #your_tfidf = tfidf[yourCorpus]
 
     model = models.LdaModel(myCorpus, id2word = myDict, num_topics = num_topics)
-    #model.show_topics(num_topics=num_topics, num_words = 10, log=False, formatted=True)
-    dum_doc = ['finance', 'money', 'sell']
-    #stupid_doc = ['divorce', 'alimony', 'support']
-    print(query_hellinger(dum_doc, yourCorpus, model, threshold = 0.7))
     model.save(model_file)
