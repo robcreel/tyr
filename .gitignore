@@ -2,6 +2,7 @@
 .tyrapp/tyrapp/data/cases.jsonl
 .tyrapp/tyrapp/data/idhash.txt
 .tyrapp/tyrapp/data/obj_ids.p
+.tyrapp/tyrapp/get_served/*
 ./app/env/
 ./bfg-1.13.0.jar
 
