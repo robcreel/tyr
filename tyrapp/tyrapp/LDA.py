@@ -60,7 +60,7 @@ with open(os.path.join(data_path, 'obj_ids.p'), 'rb') as pickle_file:
 def query_hellinger(doc, lda_corpus, model, threshold = 0.3,limit = 100):
     doc_bow = model.id2word.doc2bow(doc)
     doc_lda = model[doc_bow]
-    print("Transforming corpus")
+    print("Zipping lda vector tuples for starmap")
     lda_tuples = [(doc_lda, other_lda) for other_lda in lda_corpus]
     print("Calculating topical relevence between upload and corpus docs")
     corpus_hellinger = pool.starmap(hellinger, lda_tuples)
