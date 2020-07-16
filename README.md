@@ -3,7 +3,7 @@
 This app uses a LDA (latent Dirichlet allocation) topic model implemented in gensim to read a given text file and find other files on similar topics.  The intended use case is legal personnel hunting for cases pertinent to some presently important case file, but there are wider use cases of LDA as well.  See wikipedia for more.
 
 ## Directory Structure
-.
+```.
 ├── LICENSE
 ├── README.md
 ├── requirements.txt
@@ -29,7 +29,7 @@ This app uses a LDA (latent Dirichlet allocation) topic model implemented in gen
         │       │   └── public_template.html
         │       └── upload.html
         └── views.py
-
+```
 
 ## Installation
 1. From console, navigate to the directory you'd like to install this tool, then run:
