@@ -20,6 +20,7 @@ doc_num = 1000
 num_topics = 50
 iterations = 400
 passes = 20
+workers = os.cpu_count()-1
 eval_every = None
 
 def create_dict(path, docNum):
@@ -56,11 +57,11 @@ else:
 with open(os.path.join(data_path, 'obj_ids.p'), 'rb') as pickle_file:
     mongo_ids = pickle.load(pickle_file)
 
-def query_hellinger(doc, corpus, model, threshold = 0.3,limit = 100):
+def query_hellinger(doc, lda_corpus, model, threshold = 0.3,limit = 100):
     doc_bow = model.id2word.doc2bow(doc)
     doc_lda = model[doc_bow]
-    print("Transforming corpus")
-    lda_tuples = [(doc_lda, model_lda) for model_lda in model[corpus]]
+    print("Zipping lda vector tuples for starmap")
+    lda_tuples = [(doc_lda, other_lda) for other_lda in lda_corpus]
     print("Calculating topical relevence between upload and corpus docs")
     corpus_hellinger = pool.starmap(hellinger, lda_tuples)
     zipped_corpus = list(zip(mongo_ids, corpus_hellinger))
@@ -73,16 +74,15 @@ def query_hellinger(doc, corpus, model, threshold = 0.3,limit = 100):
 
 if(__name__ == '__main__'):
     if(len(sys.argv) > 1):
-        data_path = sys.argv[1]
+        doc_num = int(sys.argv[1])
     if(len(sys.argv) > 2):
-        doc_num = int(sys.argv[2])
-    if(len(sys.argv) > 3):
-        num_topics = int(sys.argv[3])
+        num_topics = int(sys.argv[2])
     #encoding features as bijection with some numerical set using dictionary
-    myDict = create_dict(data_path, doc_num)
+    csv_path = os.path.join(data_path, 'data.csv')
+    myDict = create_dict(csv_path, doc_num)
     #creating two identical corpora. Necessary since corpora is implemented as generator coroutine
-    myCorpus = CaseCorpus(data_path, myDict)
+    myCorpus = CaseCorpus(csv_path, myDict)
 
-    model = models.LdaModel(myCorpus, id2word = myDict, num_topics = num_topics,
-                            chunksize=chunksize, iterations = iterations, eval_every=eval_every)
+    model = models.LdaMulticore(myCorpus, id2word = myDict, num_topics = num_topics,
+                            chunksize=chunksize, iterations = iterations, eval_every=eval_every, workers=workers)
     model.save(model_file)
