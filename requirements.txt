@@ -36,7 +36,7 @@ CherryPy==18.6.0
 click==7.1.2
 colorama==0.4.3
 contextlib2==0.6.0.post1
-cryptography==2.9.2
+cryptography==3.2
 cupshelpers==1.0
 cvxopt==1.2.5
 cycler==0.10.0
