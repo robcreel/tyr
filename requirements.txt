@@ -115,7 +115,7 @@ LibAppArmor==2.13.4
 lit==0.10.0.dev0
 lockfile==0.12.2
 louis==3.14.0
-lxml==4.5.1
+lxml==4.6.2
 Mako==1.1.3
 Markdown==3.1.1
 MarkupSafe==1.1.1
