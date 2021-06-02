@@ -248,7 +248,7 @@ tqdm==4.46.1
 traitlets==4.3.3
 tzlocal==2.1
 udiskie==2.2.0
-urllib3==1.25.9
+urllib3==1.26.5
 virtualenv==20.0.20
 virtualenv-clone==0.5.4
 virtualenvwrapper==4.8.4
