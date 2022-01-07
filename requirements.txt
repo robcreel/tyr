@@ -38,7 +38,7 @@ colorama==0.4.3
 contextlib2==0.6.0.post1
 cryptography==2.9.2
 cupshelpers==1.0
-cvxopt==1.2.5
+cvxopt==1.2.7
 cycler==0.10.0
 cymem==2.0.3
 cypari2==2.1.1
