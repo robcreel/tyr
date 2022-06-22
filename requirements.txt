@@ -133,7 +133,7 @@ networkx==2.4
 nltk==3.5
 notebook==6.0.3
 npyscreen==4.10.5
-numpy==1.18.5
+numpy==1.22.0
 ordered-set==3.1.1
 packaging==20.4
 pacman-mirrors==4.16.4
