@@ -97,7 +97,7 @@ jaraco.text==3.2.0
 jedi==0.17.0
 Jinja2==2.11.2
 jmespath==0.10.0
-joblib==0.15.1
+joblib==1.2.0
 json5==0.9.5
 jsonschema==3.2.0
 jupyter-client==6.1.3
