@@ -27,7 +27,7 @@ catalogue==1.0.0
 ceph-volume==1.0.0
 cephfs==2.0.0
 cephfs-shell==0.0.1
-certifi==2020.4.5.1
+certifi==2022.12.7
 cffi==1.14.0
 chardet==3.0.4
 Cheetah3==3.2.5
